@@ -9,8 +9,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- React 18 + ReactDOM 18 (UMD) -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+      crossorigin
+    ></script>
 
     <!-- Babel for JSX-in-browser -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -38,6 +44,14 @@
         background: #f0f4f8;
         color: #0f172a;
         overflow: hidden;
+      }
+
+      /* Allow scrolling on small screens */
+      @media (max-width: 768px) {
+        html,
+        body {
+          overflow: auto;
+        }
       }
 
       h1,
@@ -139,7 +153,9 @@
         z-index: 10;
       }
       .image-card img {
-        transition: transform 0.3s var(--ease-snappy), filter 0.24s ease;
+        transition:
+          transform 0.3s var(--ease-snappy),
+          filter 0.24s ease;
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -169,7 +185,8 @@
   <body>
     <div id="root"></div>
 
-    <script type="text/babel">
+    <!-- Main slideshow script -->
+    <script type="text/babel" data-presets="env,react">
       const { useState, useEffect, useRef } = React;
 
       // --- ICONS ---
@@ -248,6 +265,7 @@
         const [revealStep, setRevealStep] = useState(0);
         const [isFullscreen, setIsFullscreen] = useState(false);
         const [scale, setScale] = useState(1);
+        const [isMobile, setIsMobile] = useState(false);
         const [revealedExampleIndices, setRevealedExampleIndices] = useState([]);
         const lastRevealedRef = useRef(null);
 
@@ -513,11 +531,7 @@
                 icon: "🏆",
                 color: "from-yellow-500 to-orange-500",
               },
-              {
-                name: "Rituals",
-                icon: "📅",
-                color: "from-teal-500 to-emerald-500",
-              },
+              { name: "Rituals", icon: "📅", color: "from-teal-500 to-emerald-500" },
             ],
             instruction:
               "In groups, translate the following five components of culture into concrete actions for our teams.",
@@ -546,7 +560,7 @@
               await document.exitFullscreen();
             }
           } catch (err) {
-            setIsFullscreen(!isFullscreen);
+            setIsFullscreen((prev) => !prev);
           }
         };
 
@@ -556,13 +570,18 @@
           return () => document.removeEventListener("fullscreenchange", handler);
         }, []);
 
-        // dynamic scale for non-fullscreen
+        // Dynamic scale and mobile detection
         useEffect(() => {
-          const updateScale = () => {
-            if (isFullscreen) {
+          const updateLayout = () => {
+            const mobile = window.innerWidth <= 768;
+            setIsMobile(mobile);
+
+            // On mobile or fullscreen we do not use transform scaling
+            if (isFullscreen || mobile) {
               setScale(1);
               return;
             }
+
             const baseWidth = 1280;
             const baseHeight = 720;
             const padding = 32;
@@ -574,9 +593,9 @@
             setScale(nextScale > 0 ? nextScale : 1);
           };
 
-          updateScale();
-          window.addEventListener("resize", updateScale);
-          return () => window.removeEventListener("resize", updateScale);
+          updateLayout();
+          window.addEventListener("resize", updateLayout);
+          return () => window.removeEventListener("resize", updateLayout);
         }, [isFullscreen]);
 
         const nextAction = () => {
@@ -607,7 +626,7 @@
             } else if (e.key === "ArrowLeft") {
               e.preventDefault();
               prevAction();
-            } else if (e.key.toLowerCase() === "f") {
+            } else if (e.key && e.key.toLowerCase() === "f") {
               e.preventDefault();
               toggleFullscreen();
             }
@@ -625,7 +644,11 @@
         };
 
         return (
-          <div className="min-h-screen flex items-center justify-center p-0 bg-slate-200 overflow-hidden">
+          <div
+            className={`min-h-screen flex items-center justify-center p-0 bg-slate-200 ${
+              isMobile ? "overflow-auto" : "overflow-hidden"
+            }`}
+          >
             <button
               type="button"
               onClick={toggleFullscreen}
@@ -645,6 +668,13 @@
               style={
                 isFullscreen
                   ? {}
+                  : isMobile
+                  ? {
+                      width: "100%",
+                      height: "100vh",
+                      overflowY: "auto",
+                      WebkitOverflowScrolling: "touch",
+                    }
                   : {
                       width: "1280px",
                       height: "720px",
@@ -752,16 +782,17 @@
                         </div>
                       ))}
                     </div>
-                    {revealStep >= (slide.points.length + 1) && slide.highlight && (
-                      <div className="mt-12 p-10 bg-gradient-to-r from-slate-900 to-slate-800 rounded-[2.5rem] shadow-2xl animate-fluid-reveal max-w-4xl w-full text-left relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 opacity-10 text-6xl group-hover:opacity-20 transition-opacity">
-                          ✨
+                    {revealStep >= ((slide.points?.length || 3) + 1) &&
+                      slide.highlight && (
+                        <div className="mt-12 p-10 bg-gradient-to-r from-slate-900 to-slate-800 rounded-[2.5rem] shadow-2xl animate-fluid-reveal max-w-4xl w-full text-left relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 p-8 opacity-10 text-6xl group-hover:opacity-20 transition-opacity">
+                            ✨
+                          </div>
+                          <p className="text-2xl md:text-3xl font-bold text-white relative z-10 leading-relaxed">
+                            "{slide.highlight}"
+                          </p>
                         </div>
-                        <p className="text-2xl md:text-3xl font-bold text-white relative z-10 leading-relaxed">
-                          "{slide.highlight}"
-                        </p>
-                      </div>
-                    )}
+                      )}
                   </div>
                 )}
 
@@ -1006,9 +1037,7 @@
                       className={`h-full bg-gradient-to-r ${
                         slide.color || "from-slate-800 to-slate-600"
                       } transition-all duration-300`}
-                      style={{
-                        width: `${((currentSlide + 1) / slides.length) * 100}%`,
-                      }}
+                      style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
                     ></div>
                   </div>
 
@@ -1046,8 +1075,24 @@
         );
       }
 
-      const root = ReactDOM.createRoot(document.getElementById("root"));
-      root.render(<CultureSlideshow />);
+      // Ensure ReactDOM mounts only after DOM and scripts are ready
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!window.React || !window.ReactDOM) {
+          console.error("React or ReactDOM not available.");
+          return;
+        }
+        const rootElement = document.getElementById("root");
+        if (!rootElement) {
+          console.error("Root element #root not found.");
+          return;
+        }
+        try {
+          const root = ReactDOM.createRoot(rootElement);
+          root.render(<CultureSlideshow />);
+        } catch (e) {
+          console.error("Failed to initialize React app", e);
+        }
+      });
     </script>
   </body>
 </html>
