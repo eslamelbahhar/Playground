@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Great Mondays – Responsive Version</title>
+    <title>Great Mondays – Fixed Nav & Layout</title>
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
@@ -32,14 +32,30 @@
         margin: 0;
         padding: 0;
         font-family: "Inter", sans-serif;
-        background: #f0f4f8;
+        background: #0f172a; /* Dark background for better framing */
         color: #0f172a;
-        overflow: hidden; /* Prevent body scroll, handle inside app */
+        overflow: hidden;
       }
 
       h1, h2, h3, h4 {
         font-family: "Space Grotesk", sans-serif;
         letter-spacing: -0.02em;
+      }
+
+      /* Custom Scrollbar styling */
+      .custom-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0,0,0,0.2) transparent;
+      }
+      .custom-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 20px;
       }
 
       /* Animations */
@@ -70,7 +86,6 @@
         transition: all 0.18s var(--ease-snappy);
       }
       
-      /* Hover effects only on devices that support hover to prevent sticking on mobile */
       @media (hover: hover) {
         .pro-card:hover {
           transform: translateY(-3px);
@@ -103,15 +118,6 @@
         inset: 0;
         opacity: 0.9;
       }
-
-      /* Mobile Scrollbar Hide */
-      .no-scrollbar::-webkit-scrollbar {
-        display: none;
-      }
-      .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
     </style>
   </head>
 
@@ -132,7 +138,7 @@
       const Maximize2 = (props) => <Icon {...props}><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" x2="14" y1="3" y2="10" /><line x1="3" x2="10" y1="21" y2="14" /></Icon>;
       const Minimize2 = (props) => <Icon {...props}><polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" /><line x1="14" x2="21" y1="10" y2="3" /><line x1="3" x2="10" y1="21" y2="14" /></Icon>;
 
-      // --- IMAGES MAP ---
+      // --- IMAGES ---
       const slideImages = {
         "Great Mondays": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop",
         "Why Culture Matters": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2070&auto=format&fit=crop",
@@ -154,7 +160,7 @@
         const [isMobile, setIsMobile] = useState(false);
         const [revealedExampleIndices, setRevealedExampleIndices] = useState([]);
         
-        // Data Structure
+        // Data
         const slides = [
           {
             type: "intro",
@@ -336,13 +342,12 @@
           return () => document.removeEventListener("fullscreenchange", handler);
         }, []);
 
-        // Responsive Scale Logic
         useEffect(() => {
           const updateScale = () => {
             const width = window.innerWidth;
             const height = window.innerHeight;
             
-            // If mobile/vertical tablet, disable fixed scaling logic
+            // Mobile/Tablet detection
             if (width < 1024) {
               setIsMobile(true);
               setScale(1);
@@ -356,7 +361,7 @@
               return;
             }
             
-            // Desktop Slide Logic
+            // Desktop Projector Mode scaling
             const baseWidth = 1280;
             const baseHeight = 720;
             const padding = 40;
@@ -418,13 +423,12 @@
           }
         };
 
-        // Wrapper Style Generation
         const getContainerStyle = () => {
           if (isMobile) {
-            // Mobile: Fluid width/height, no transforms
+            // Mobile: Dynamic viewport height
             return {
               width: "100%",
-              height: "100%",
+              height: "100dvh", 
               borderRadius: 0,
               border: "none"
             };
@@ -443,13 +447,12 @@
         };
 
         return (
-          <div className={`min-h-screen w-full bg-slate-200 flex flex-col items-center ${isMobile ? "" : "justify-center p-4"}`}>
+          <div className={`min-h-screen w-full flex flex-col items-center ${isMobile ? "bg-black" : "bg-slate-800 justify-center p-4"}`}>
             
-            {/* Controls - Repositioned for mobile */}
             <button
               type="button"
               onClick={toggleFullscreen}
-              className={`fixed z-50 p-3 rounded-full bg-white/80 text-slate-900 shadow-lg backdrop-blur-md border border-slate-200 ${isMobile ? "top-2 right-2 p-2" : "top-4 right-4"}`}
+              className={`fixed z-[60] p-2 rounded-full bg-white/80 text-slate-900 shadow-lg backdrop-blur-md border border-slate-200 ${isMobile ? "top-3 right-3" : "top-6 right-6"}`}
             >
               {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
             </button>
@@ -463,189 +466,185 @@
                 <img
                   key={currentSlide}
                   src={slideImages[slide.title] || slideImages["Great Mondays"]}
-                  className="w-full h-full object-cover animate-slow-pan opacity-40 md:opacity-100 transition-opacity"
+                  className="w-full h-full object-cover animate-slow-pan opacity-100 transition-opacity"
                   alt="Background"
                 />
-                <div className="absolute inset-0 bg-white/90 md:bg-white/80 backdrop-blur-xl"></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/70 to-white/20"></div>
+                <div className="absolute inset-0 bg-white/90 backdrop-blur-xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/80 to-slate-50/80"></div>
               </div>
 
-              {/* Content Layer - Added overflow-y-auto for mobile scrolling */}
-              <div className="relative z-10 flex flex-col h-full w-full overflow-y-auto no-scrollbar">
+              {/* Scrollable Content Area with Padding Bottom for Nav */}
+              <div className="absolute inset-0 z-10 overflow-y-auto custom-scroll flex flex-col">
+                <div className="flex-1 flex flex-col pb-32 md:pb-28"> 
                 
-                {/* --- INTRO SLIDE --- */}
-                {slide.type === "intro" && (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center p-6 md:p-12">
-                    <div className={`transition-all duration-500 ${revealStep >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
-                      <div className="inline-flex items-center justify-center p-4 md:p-6 rounded-3xl bg-gradient-to-br from-red-500 to-rose-600 shadow-xl text-white mb-6 animate-float">
-                        <span className="text-3xl md:text-5xl">🚀</span>
+                  {/* --- INTRO SLIDE --- */}
+                  {slide.type === "intro" && (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center p-6 md:p-12 min-h-full">
+                      <div className={`transition-all duration-500 ${revealStep >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
+                        <div className="inline-flex items-center justify-center p-4 md:p-6 rounded-3xl bg-gradient-to-br from-red-500 to-rose-600 shadow-xl text-white mb-6 animate-float">
+                          <span className="text-3xl md:text-5xl">🚀</span>
+                        </div>
+                        <h1 className="text-4xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-slate-900 leading-none mb-4">
+                          {slide.title}
+                        </h1>
+                        <p className="text-lg md:text-3xl text-slate-600 font-light max-w-2xl mx-auto">
+                          {slide.subtitle}
+                        </p>
                       </div>
-                      <h1 className="text-4xl md:text-7xl lg:text-9xl font-bold tracking-tighter text-slate-900 leading-none mb-4">
+                      
+                      <div className="mt-8 md:mt-16 w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
+                        {slide.objectives.map((obj, idx) => (
+                          <div
+                            key={idx}
+                            className={`pro-card p-6 rounded-2xl md:rounded-[2rem] flex flex-row md:flex-col items-center md:items-start gap-4 md:h-64 transition-all duration-500 ${
+                              revealStep >= idx + 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                            }`}
+                          >
+                            <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-white flex items-center justify-center text-lg md:text-2xl font-bold text-slate-900 shadow-sm border border-slate-100 shrink-0">
+                              {idx + 1}
+                            </div>
+                            <div className="text-left">
+                              <div className="text-2xl md:text-3xl md:mb-2">{obj.icon}</div>
+                              <p className="text-lg md:text-xl font-medium text-slate-800">{obj.text}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* --- WHY SLIDES --- */}
+                  {slide.type === "why" && (
+                    <div className="flex-1 flex flex-col justify-center items-center text-center p-6 md:p-12 min-h-full">
+                      <h1 className={`text-3xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 md:mb-16 text-slate-900 transition-all duration-500 ${revealStep >= 0 ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
                         {slide.title}
                       </h1>
-                      <p className="text-lg md:text-3xl text-slate-600 font-light max-w-2xl mx-auto">
-                        {slide.subtitle}
-                      </p>
-                    </div>
-                    
-                    <div className="mt-8 md:mt-16 w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
-                      {slide.objectives.map((obj, idx) => (
-                        <div
-                          key={idx}
-                          className={`pro-card p-6 rounded-2xl md:rounded-[2rem] flex flex-row md:flex-col items-center md:items-start gap-4 md:h-64 transition-all duration-500 ${
-                            revealStep >= idx + 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-                          }`}
-                        >
-                          <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-white flex items-center justify-center text-lg md:text-2xl font-bold text-slate-900 shadow-sm border border-slate-100 shrink-0">
-                            {idx + 1}
+                      <div className="grid grid-cols-1 gap-3 md:gap-4 max-w-4xl w-full">
+                        {slide.points.map((point, idx) => (
+                          <div key={idx} className={`pro-card flex items-center gap-4 md:gap-6 p-4 md:p-6 rounded-2xl md:rounded-[2rem] bg-white/90 transition-all duration-300 ${revealStep >= idx + 1 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"}`}>
+                            <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.8)] shrink-0"></div>
+                            <p className="text-lg md:text-2xl text-slate-800 font-light text-left">{point}</p>
                           </div>
-                          <div className="text-left">
-                             <div className="text-2xl md:text-3xl md:mb-2">{obj.icon}</div>
-                             <p className="text-lg md:text-xl font-medium text-slate-800">{obj.text}</p>
+                        ))}
+                      </div>
+                      {revealStep >= (slide.points.length + 1) && slide.highlight && (
+                        <div className="mt-8 md:mt-12 p-6 md:p-10 bg-slate-900 rounded-3xl md:rounded-[2.5rem] shadow-2xl max-w-4xl w-full text-left animate-fluid-reveal">
+                          <p className="text-lg md:text-3xl font-bold text-white leading-relaxed">"{slide.highlight}"</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* --- COMPONENT SLIDES --- */}
+                  {slide.type === "component" && (
+                    <div className="flex-1 flex flex-col p-6 md:p-10 lg:p-12">
+                      {/* Header */}
+                      <div className={`flex flex-col md:flex-row md:items-end gap-4 md:gap-8 mb-6 md:mb-12 transition-all duration-500 ${revealStep >= 0 ? "opacity-100" : "opacity-0 -translate-y-4"}`}>
+                        <div className="flex items-center gap-4">
+                          <div className={`w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-[2rem] bg-gradient-to-br ${slide.color} flex items-center justify-center text-3xl md:text-5xl shadow-xl text-white shrink-0`}>
+                            {slide.iconEmoji}
+                          </div>
+                          <div className="md:hidden">
+                            <p className={`${slide.accent} text-xs font-bold uppercase tracking-widest`}>{slide.subtitle}</p>
+                            <h1 className="text-3xl font-bold text-slate-900">{slide.title}</h1>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* --- WHY SLIDES --- */}
-                {slide.type === "why" && (
-                  <div className="flex-1 flex flex-col justify-center items-center text-center p-6 md:p-12">
-                    <h1 className={`text-3xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-8 md:mb-16 text-slate-900 transition-all duration-500 ${revealStep >= 0 ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
-                      {slide.title}
-                    </h1>
-                    <div className="grid grid-cols-1 gap-3 md:gap-4 max-w-4xl w-full">
-                      {slide.points.map((point, idx) => (
-                        <div key={idx} className={`pro-card flex items-center gap-4 md:gap-6 p-4 md:p-6 rounded-2xl md:rounded-[2rem] bg-white/90 transition-all duration-300 ${revealStep >= idx + 1 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"}`}>
-                          <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.8)] shrink-0"></div>
-                          <p className="text-lg md:text-2xl text-slate-800 font-light text-left">{point}</p>
-                        </div>
-                      ))}
-                    </div>
-                    {revealStep >= (slide.points.length + 1) && slide.highlight && (
-                      <div className="mt-8 md:mt-12 p-6 md:p-10 bg-slate-900 rounded-3xl md:rounded-[2.5rem] shadow-2xl max-w-4xl w-full text-left animate-fluid-reveal mx-4">
-                        <p className="text-lg md:text-3xl font-bold text-white leading-relaxed">"{slide.highlight}"</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* --- COMPONENT SLIDES --- */}
-                {slide.type === "component" && (
-                  <div className="flex-1 flex flex-col p-6 md:p-10 lg:p-12 pb-24">
-                    {/* Header */}
-                    <div className={`flex flex-col md:flex-row md:items-end gap-4 md:gap-8 mb-6 md:mb-12 transition-all duration-500 ${revealStep >= 0 ? "opacity-100" : "opacity-0 -translate-y-4"}`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-16 h-16 md:w-24 md:h-24 rounded-2xl md:rounded-[2rem] bg-gradient-to-br ${slide.color} flex items-center justify-center text-3xl md:text-5xl shadow-xl text-white shrink-0`}>
-                          {slide.iconEmoji}
-                        </div>
-                        <div className="md:hidden">
-                          <p className={`${slide.accent} text-xs font-bold uppercase tracking-widest`}>{slide.subtitle}</p>
-                          <h1 className="text-3xl font-bold text-slate-900">{slide.title}</h1>
+                        <div className="hidden md:block">
+                          <p className={`${slide.accent} font-mono text-sm tracking-[0.25em] uppercase mb-2 font-bold`}>{slide.subtitle}</p>
+                          <h1 className="text-5xl md:text-7xl font-bold text-slate-900">{slide.title}</h1>
                         </div>
                       </div>
-                      <div className="hidden md:block">
-                        <p className={`${slide.accent} font-mono text-sm tracking-[0.25em] uppercase mb-2 font-bold`}>{slide.subtitle}</p>
-                        <h1 className="text-5xl md:text-7xl font-bold text-slate-900">{slide.title}</h1>
-                      </div>
-                    </div>
 
-                    {/* Grid Content */}
-                    <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 md:gap-8 h-full">
-                      
-                      {/* Left Column (Definition & Reflection) */}
-                      <div className="lg:col-span-4 flex flex-col gap-4 md:gap-6">
-                        <div className={`definition-card p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] transition-all duration-500 delay-100 ${revealStep >= 1 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"}`}>
-                          <p className="text-base md:text-xl font-bold leading-relaxed text-white/90">{slide.meaning}</p>
-                          <div className={`w-12 h-1 rounded-full bg-gradient-to-r ${slide.color} mt-4`}></div>
-                        </div>
+                      {/* Grid Content */}
+                      <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 md:gap-8 h-full">
                         
-                        {/* Reflection (Desktop: Bottom Left, Mobile: Bottom of list) */}
-                         <div className={`pro-card bg-white p-5 md:p-6 rounded-3xl border-l-8 ${slide.color.replace("from-", "border-").split(" ")[0]} transition-all duration-500 delay-200 ${revealStep >= 4 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} hidden lg:block`}>
-                          <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Reflect</h3>
-                          <p className="text-lg font-medium text-slate-800">{slide.reflection}</p>
-                        </div>
-                      </div>
-
-                      {/* Right Column (Examples & Takeaway) */}
-                      <div className="lg:col-span-8 flex flex-col gap-6">
-                        <div className={`transition-all duration-500 delay-150 ${revealStep >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-                           <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3 ml-2 md:hidden">Examples</h3>
-                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                            {slide.examples?.map((ex, i) => {
-                              const isRevealed = revealedExampleIndices.includes(i);
-                              return (
-                                <div
-                                  key={i}
-                                  onMouseEnter={() => !isMobile && handleExampleInteraction(i)}
-                                  onClick={() => handleExampleInteraction(i)}
-                                  className="image-card relative rounded-3xl p-4 h-40 md:h-52 flex flex-col justify-center items-center text-center group active:scale-95"
-                                >
-                                  <img src={ex.img} alt="example" />
-                                  <div className={`absolute inset-0 ${isRevealed ? "bg-black/80 backdrop-blur-sm" : "bg-black/30 group-hover:bg-black/50"} transition-all duration-300 z-10`}></div>
-                                  
-                                  {/* Tap hint for mobile */}
-                                  {!isRevealed && <div className="absolute z-20 text-white/80 text-sm font-medium animate-pulse md:hidden">Tap to reveal</div>}
-
-                                  <div className={`relative z-20 transition-all duration-300 ${isRevealed ? "opacity-0" : "opacity-100"} hidden md:block`}>
-                                    <div className="bg-white/20 p-3 rounded-full backdrop-blur-md"><div className="text-2xl text-white">✨</div></div>
-                                  </div>
-
-                                  <div className={`absolute inset-0 p-4 flex flex-col justify-center items-center z-20 transition-all duration-300 ${isRevealed ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
-                                    <div className="text-3xl mb-1">{ex.logo || ex.icon}</div>
-                                    <div className="font-bold text-base md:text-lg text-white leading-tight mb-1">{ex.company || ex.value || ex.behavior || ex.benefit || ex.ritual || ex.cue}</div>
-                                    <div className="text-xs text-gray-300 leading-snug">{ex.purpose || ex.detail || ex.description || ex.impact}</div>
-                                  </div>
-                                </div>
-                              );
-                            })}
+                        {/* Left Column */}
+                        <div className="lg:col-span-4 flex flex-col gap-4 md:gap-6">
+                          <div className={`definition-card p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] transition-all duration-500 delay-100 ${revealStep >= 1 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"}`}>
+                            <p className="text-base md:text-xl font-bold leading-relaxed text-white/90">{slide.meaning}</p>
+                            <div className={`w-12 h-1 rounded-full bg-gradient-to-r ${slide.color} mt-4`}></div>
+                          </div>
+                          
+                          {/* Desktop Reflection */}
+                          <div className={`pro-card bg-white p-5 md:p-6 rounded-3xl border-l-8 ${slide.color.replace("from-", "border-").split(" ")[0]} transition-all duration-500 delay-200 ${revealStep >= 4 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} hidden lg:block`}>
+                            <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Reflect</h3>
+                            <p className="text-lg font-medium text-slate-800">{slide.reflection}</p>
                           </div>
                         </div>
 
-                        <div className={`bg-gradient-to-r ${slide.color} p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-xl transition-all duration-500 ${revealStep >= 3 ? "opacity-100" : "opacity-0"}`}>
-                          <h3 className="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">Key Takeaway</h3>
-                          <p className="text-lg md:text-2xl font-bold text-white leading-tight">"{slide.takeaway}"</p>
-                        </div>
+                        {/* Right Column */}
+                        <div className="lg:col-span-8 flex flex-col gap-6">
+                          <div className={`transition-all duration-500 delay-150 ${revealStep >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+                            <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3 ml-2 md:hidden">Examples</h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                              {slide.examples?.map((ex, i) => {
+                                const isRevealed = revealedExampleIndices.includes(i);
+                                return (
+                                  <div
+                                    key={i}
+                                    onMouseEnter={() => !isMobile && handleExampleInteraction(i)}
+                                    onClick={() => handleExampleInteraction(i)}
+                                    className="image-card relative rounded-3xl p-4 h-40 md:h-52 flex flex-col justify-center items-center text-center group active:scale-95"
+                                  >
+                                    <img src={ex.img} alt="example" />
+                                    <div className={`absolute inset-0 ${isRevealed ? "bg-black/80 backdrop-blur-sm" : "bg-black/30 group-hover:bg-black/50"} transition-all duration-300 z-10`}></div>
+                                    {!isRevealed && <div className="absolute z-20 text-white/80 text-sm font-medium animate-pulse md:hidden">Tap to reveal</div>}
+                                    <div className={`relative z-20 transition-all duration-300 ${isRevealed ? "opacity-0" : "opacity-100"} hidden md:block`}>
+                                      <div className="bg-white/20 p-3 rounded-full backdrop-blur-md"><div className="text-2xl text-white">✨</div></div>
+                                    </div>
+                                    <div className={`absolute inset-0 p-4 flex flex-col justify-center items-center z-20 transition-all duration-300 ${isRevealed ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
+                                      <div className="text-3xl mb-1">{ex.logo || ex.icon}</div>
+                                      <div className="font-bold text-base md:text-lg text-white leading-tight mb-1">{ex.company || ex.value || ex.behavior || ex.benefit || ex.ritual || ex.cue}</div>
+                                      <div className="text-xs text-gray-300 leading-snug">{ex.purpose || ex.detail || ex.description || ex.impact}</div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
 
-                         {/* Mobile Reflection (Shown at bottom) */}
-                         <div className={`pro-card bg-white p-5 rounded-3xl border-l-8 ${slide.color.replace("from-", "border-").split(" ")[0]} transition-all duration-500 ${revealStep >= 4 ? "opacity-100" : "opacity-0"} lg:hidden`}>
-                          <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Reflect</h3>
-                          <p className="text-base font-medium text-slate-800">{slide.reflection}</p>
-                        </div>
+                          <div className={`bg-gradient-to-r ${slide.color} p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-xl transition-all duration-500 ${revealStep >= 3 ? "opacity-100" : "opacity-0"}`}>
+                            <h3 className="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">Key Takeaway</h3>
+                            <p className="text-lg md:text-2xl font-bold text-white leading-tight">"{slide.takeaway}"</p>
+                          </div>
 
+                          {/* Mobile Reflection */}
+                          <div className={`pro-card bg-white p-5 rounded-3xl border-l-8 ${slide.color.replace("from-", "border-").split(" ")[0]} transition-all duration-500 ${revealStep >= 4 ? "opacity-100" : "opacity-0"} lg:hidden`}>
+                            <h3 className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Reflect</h3>
+                            <p className="text-base font-medium text-slate-800">{slide.reflection}</p>
+                          </div>
+
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* --- BREAKOUT ROOMS --- */}
-                {slide.type === "breakout" && (
-                  <div className="flex-1 flex flex-col items-center justify-center text-center p-6 md:p-12">
-                    <div className={`mb-8 transition-all duration-500 ${revealStep >= 0 ? "opacity-100" : "opacity-0 translate-y-4"}`}>
-                      <div className="inline-flex p-3 rounded-full bg-white shadow-md mb-2 text-3xl">🔥</div>
-                      <h1 className="text-4xl md:text-7xl font-bold text-slate-900 mb-2">{slide.title}</h1>
-                      <p className="text-lg md:text-2xl text-slate-600 font-light">{slide.subtitle}</p>
-                    </div>
-                    <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 px-4">
-                      {slide.rooms.map((room, idx) => (
-                        <div key={idx} className={`pro-card flex md:flex-col items-center p-4 md:p-6 rounded-2xl md:rounded-[2rem] gap-4 hover:scale-105 transition-all duration-300 ${revealStep >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
-                          <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br ${room.color} flex items-center justify-center text-2xl md:text-3xl text-white shadow-lg shrink-0`}>{room.icon}</div>
-                          <div className="text-left md:text-center">
-                            <h3 className="text-lg font-bold text-slate-800">{room.name}</h3>
-                            <p className="text-xs text-slate-500 uppercase tracking-widest">Room {idx + 1}</p>
+                  {/* --- BREAKOUT ROOMS --- */}
+                  {slide.type === "breakout" && (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center p-6 md:p-12 min-h-full">
+                      <div className={`mb-8 transition-all duration-500 ${revealStep >= 0 ? "opacity-100" : "opacity-0 translate-y-4"}`}>
+                        <div className="inline-flex p-3 rounded-full bg-white shadow-md mb-2 text-3xl">🔥</div>
+                        <h1 className="text-4xl md:text-7xl font-bold text-slate-900 mb-2">{slide.title}</h1>
+                        <p className="text-lg md:text-2xl text-slate-600 font-light">{slide.subtitle}</p>
+                      </div>
+                      <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 px-4">
+                        {slide.rooms.map((room, idx) => (
+                          <div key={idx} className={`pro-card flex md:flex-col items-center p-4 md:p-6 rounded-2xl md:rounded-[2rem] gap-4 hover:scale-105 transition-all duration-300 ${revealStep >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+                            <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br ${room.color} flex items-center justify-center text-2xl md:text-3xl text-white shadow-lg shrink-0`}>{room.icon}</div>
+                            <div className="text-left md:text-center">
+                              <h3 className="text-lg font-bold text-slate-800">{room.name}</h3>
+                              <p className="text-xs text-slate-500 uppercase tracking-widest">Room {idx + 1}</p>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                      <div className={`mt-8 bg-white/90 p-4 md:p-6 rounded-2xl shadow-lg max-w-xl transition-all duration-500 ${revealStep >= 1 ? "opacity-100" : "opacity-0"}`}>
+                        <p className="font-medium text-slate-700">📢 {slide.instruction}</p>
+                      </div>
                     </div>
-                    <div className={`mt-8 bg-white/90 p-4 md:p-6 rounded-2xl shadow-lg max-w-xl transition-all duration-500 ${revealStep >= 1 ? "opacity-100" : "opacity-0"}`}>
-                      <p className="font-medium text-slate-700">📢 {slide.instruction}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Spacer for bottom nav on mobile */}
-                <div className="h-24 w-full md:hidden shrink-0"></div>
+                  )}
+
+                </div>
               </div>
 
               {/* --- BOTTOM NAV --- */}
@@ -659,7 +658,7 @@
                 </div>
 
                 {/* Controls Container */}
-                <div className="flex justify-between items-center p-4 md:p-6 bg-gradient-to-t from-white via-white/80 to-transparent">
+                <div className="flex justify-between items-center p-4 md:p-6 bg-gradient-to-t from-white via-white/90 to-transparent pt-10">
                   {/* Counter */}
                   <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 text-xs md:text-sm font-medium text-slate-500 shadow-md border border-slate-200">
                     <span className="text-slate-900 font-bold">{(currentSlide + 1).toString().padStart(2, "0")}</span>
